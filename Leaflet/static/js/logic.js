@@ -6,6 +6,21 @@ d3.json(queryURL, function(data){
     createFeatures(data.features);
 })
 
+function Color(magnitude) {
+    if (magnitude >= 5) {
+        return 'red'
+    } else if (magnitude >= 4) {
+        return 'darkorange'
+    } else if (magnitude >= 3) {
+        return 'orange'
+    } else if (magnitude >= 2) {
+        return 'yellow'
+    } else if (magnitude >= 1) {
+        return 'darkgreen'
+    } else {
+        return 'lightgreen'
+    }
+};
 function createFeatures(earthquakeData) {
     
     //create popup feature
@@ -17,7 +32,18 @@ function createFeatures(earthquakeData) {
 
     //create geoJSONlayer
     var earthquakes= L.geoJSON(earthquakeData, {
-        onEachFeature: onEachFeature
+        onEachFeature: onEachFeature,
+        pointToLayer: function (point, latlng) {
+            return L.circleMarker(latlng, { radius: 4*point.properties.mag });
+        },
+        style: function (geoJsonFeature) {
+            return {
+                fillColor: Color(geoJsonFeature.properties.mag),
+                fillOpacity: 0.7,
+                weight: 0.1,
+                color: 'black'
+            }
+        }
     })
 
     createMap(earthquakes);
@@ -52,5 +78,32 @@ function createMap(earthquakes){
     L.control.layers(baseMaps, overlayMaps, {
         collapsed: false
       }).addTo(myMap);
-    
-}
+    //add legend
+    var legend = L.control({ position: 'bottomright' });
+
+    legend.onAdd = function (map) {
+  
+        var div = L.DomUtil.create('div', 'info legend'),
+            magnitude = [0, 1, 2, 3, 4, 5],
+            //colors = Color.options.colors,
+            labels = [];
+  
+        var legendInfo = "<h4 style='margin:4px'>Magnitude</h4>" +
+        "<div class=\"labels\">"  +
+        "<div class=\"min\">" + magnitude[0] + "</div>" +
+        "<div class=\"max\">" + magnitude[magnitude.length - 1] + "</div>" +
+        "</div>";
+
+        div.innerHTML = legendInfo;
+        
+        magnitude.forEach(function(mag){
+            labels.push("<li style=\"background-color: " + Color(mag) + "\"></li>");
+        });
+
+        div.innerHTML += "<ul>" + labels.join("") + "</ul>";
+       
+        console.log(labels)
+        return div;
+    }
+    legend.addTo(myMap);
+};
