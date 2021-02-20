@@ -6,16 +6,16 @@ d3.json(queryURL, function(data){
     createFeatures(data.features);
 })
 
-function Color(magnitude) {
-    if (magnitude >= 5) {
+function Color(depth) {
+    if (depth >= 90) {
         return 'red'
-    } else if (magnitude >= 4) {
+    } else if (depth >= 70) {
         return 'darkorange'
-    } else if (magnitude >= 3) {
+    } else if (depth >= 50) {
         return 'orange'
-    } else if (magnitude >= 2) {
+    } else if (depth >= 30) {
         return 'yellow'
-    } else if (magnitude >= 1) {
+    } else if (depth >= 10) {
         return 'darkgreen'
     } else {
         return 'lightgreen'
@@ -27,7 +27,8 @@ function createFeatures(earthquakeData) {
     function onEachFeature(feature, layer) {
         layer.bindPopup("<h3>" + feature.properties.place 
         + "</h3><hr><p>" + new Date(feature.properties.time) + "</p>"
-        + "</h3><hr><p>Magnitude: " + feature.properties.mag + "</p>");
+        + "</h3><hr><p>Magnitude: " + feature.properties.mag + "</p>"
+        + "</h3><hr><p>Depth: " + feature.geometry.coordinates[2] + "</p>");
     }
 
     //create geoJSONlayer
@@ -38,7 +39,7 @@ function createFeatures(earthquakeData) {
         },
         style: function (geoJsonFeature) {
             return {
-                fillColor: Color(geoJsonFeature.properties.mag),
+                fillColor: Color(geoJsonFeature.geometry.coordinates[2]),
                 fillOpacity: 0.7,
                 weight: 0.1,
                 color: 'black'
@@ -84,20 +85,20 @@ function createMap(earthquakes){
     legend.onAdd = function (map) {
   
         var div = L.DomUtil.create('div', 'info legend'),
-            magnitude = [0, 1, 2, 3, 4, 5],
+            depth = [-10, 10, 30, 50, 70, 90],
             //colors = Color.options.colors,
             labels = [];
   
-        var legendInfo = "<h4 style='margin:4px'>Magnitude</h4>" +
+        var legendInfo = "<h4 style='margin:4px'>Depth</h4>" +
         "<div class=\"labels\">"  +
-        "<div class=\"min\">" + magnitude[0] + "</div>" +
-        "<div class=\"max\">" + magnitude[magnitude.length - 1] + "</div>" +
+        "<div class=\"min\">" + depth[0] + "</div>" +
+        "<div class=\"max\">" + depth[depth.length - 1] + "</div>" +
         "</div>";
 
         div.innerHTML = legendInfo;
         
-        magnitude.forEach(function(mag){
-            labels.push("<li style=\"background-color: " + Color(mag) + "\"></li>");
+        depth.forEach(function(dep){
+            labels.push("<li style=\"background-color: " + Color(dep) + "\"></li>");
         });
 
         div.innerHTML += "<ul>" + labels.join("") + "</ul>";
